@@ -218,18 +218,25 @@ function App() {
             const usmBuyPrice = await usmViewContract.usmPrice(0); // buy price
             const usmSellPrice = await usmViewContract.usmPrice(1); // sell price
 
-            console.log(ethers.utils.formatEther(usmBuyPrice), ethers.utils.formatEther(usmSellPrice));
+            console.log("USM Buy Price in ETH", ethers.utils.formatEther(usmBuyPrice));
+            console.log("USM Sell Price in ETH", ethers.utils.formatEther(usmSellPrice));
         }
 
         const fumPriceView = async () => {
             const fumBuyPrice = await usmViewContract.fumPrice(0);
             const fumSellPrice = await usmViewContract.fumPrice(1);
 
-            console.log(ethers.utils.formatEther(fumBuyPrice), ethers.utils.formatEther(fumSellPrice));
+            console.log("FUM Buy Price in ETH", ethers.utils.formatEther(fumBuyPrice));
+            console.log("FUM Sell Price in ETH", ethers.utils.formatEther(fumSellPrice));
         }
 
-        //debtRatioView();
-        //usmPriceView();
+        const userFumUsmBalance = async () => {
+            const user_fum_bal = await fumContract.balanceOf(signerAddress);
+            const user_usm_bal = await usmContract.balanceOf(signerAddress);
+
+            console.log("user_fum_bal", ethers.utils.formatEther(user_fum_bal));
+            console.log("user_usm_bal", ethers.utils.formatEther(user_usm_bal));
+        }
 
         return (
             <div class="container">
@@ -254,8 +261,22 @@ function App() {
                             <div class="col">
                                 <button onClick={() => getUserWETHBalance()}>Check WETH Balance</button>
                             </div>
+                            <div class="col">
+                                <button onClick={() => ethBufferView()}>ETH available in Buffer</button>
+                            </div>
+                            <div class="col">
+                                <button onClick={() => debtRatioView()}>Current Debt Ratio</button>
+                            </div>
+                            <div class="col">
+                                <button onClick={() => usmPriceView()}>Current USM Price in ETH</button>
+                            </div>
+                            <div class="col">
+                                <button onClick={() => fumPriceView()}>Current FUM Price in ETH</button>
+                            </div>
+                            <div class="col">
+                                <button onClick={() => userFumUsmBalance()}>FUM USM balance</button>
+                            </div>
 
-                            
                         </div>
                     </div>
                 </div>
