@@ -9,6 +9,7 @@ function App() {
     const [provider, setProvider] = useState(undefined);
     const [metamask, setMetamask] = useState(undefined);
     const [usmContract, setUsmContract] = useState(undefined);
+    const [fumContract, setFumContract] = useState(undefined);
     const [proxyContract, setProxyContract] = useState(undefined);
     const [usmViewContract, setUsmViewContract] = useState(undefined);
     const [wethContract, setWethContract] = useState(undefined);
@@ -54,7 +55,13 @@ function App() {
             usm.address[network.chainId], usm.abi, signer
         );
 
-        setUsmContract(usmContract);
+        setUsmContract(usmContract);        
+        
+        const fumContract = new ethers.Contract(
+            fum.address[network.chainId], fum.abi, signer
+        );
+
+        setFumContract(fumContract);
 
         const proxyContract = new ethers.Contract(
             proxy.address[network.chainId], proxy.abi, signer
@@ -126,6 +133,12 @@ function App() {
         const updateFundFUMAmountFunc = (e) => setFundFUMAmount(e);
         const updateDefundFUMAmountFunc = (e) => setDefundFUMAmount(e);
 
+        const getUserWETHBalance = async () => {
+            const weth_bal = await wethContract.balanceOf(signerAddress);
+            console.log(Number(weth_bal._hex));
+            return Number(weth_bal._hex);
+        }
+
         // Mint weth to use mint and fund functions (Only useful in local testing)
         const mintWeth = async (eth) => {
             eth = Number(eth).toString();
@@ -155,21 +168,37 @@ function App() {
         }
 
         const mintUSM = async (amount) => {
+            const user_weth_balance = await getUserWETHBalance();
+            if(Number(user_weth_balance< amount)) {
+                alert("You do not have sufficient WETH in your wallet. Available WETH: "+user_weth_balance+" .Tx reverted.");
+                return false;
+            }
+            amount = ethers.utils.parseEther(amount)['_hex'];
+            console.log(Number(amount));
             let data = await proxyContract.mint(signerAddress, amount, 0);
             console.log(data);
         }
 
         const burnUSM = async (amount) => {
+            amount = ethers.utils.parseEther(amount);
             let data = await proxyContract.burn(signerAddress, amount, 0);
             console.log(data);
         }
 
         const fundFUM = async (amount) => {
+            const user_weth_balance = await getUserWETHBalance();
+            if(Number(user_weth_balance< amount)) {
+                alert("You do not have sufficient WETH in your wallet. Available WETH: "+user_weth_balance+" .Tx reverted.");
+                return false;
+            }
+            amount = ethers.utils.parseEther(amount)['_hex'];
+            console.log(amount);
             let fundFum = await proxyContract.fund(signerAddress, amount, 0);
             console.log(fundFum);
         }
 
         const defundFUM = async (amount) => {
+            amount = ethers.utils.parseEther(amount);
             let defundFum = await proxyContract.defund(signerAddress, amount, 0);
             console.log(defundFum);
         }
@@ -222,6 +251,11 @@ function App() {
                             <div class="col">
                                 <button onClick={() => addProxyAsDelegate()}>Add Proxy As Delegate</button>
                             </div>
+                            <div class="col">
+                                <button onClick={() => getUserWETHBalance()}>Check WETH Balance</button>
+                            </div>
+
+                            
                         </div>
                     </div>
                 </div>
